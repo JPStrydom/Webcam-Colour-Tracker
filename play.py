@@ -17,21 +17,23 @@ img_draw = []
 tolerance = 0.15
 
 
-def calculate_color_threshold(img_c):
-    img_hsv = cv2.cvtColor(img_c, cv2.COLOR_BGR2HSV)
+def calculate_color_threshold(img_rgb):
+    img_hsv = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2HSV)
 
     scan_area = img_hsv[round(camera_height / 2) - 10: round(camera_height / 2) + 10,
                         round(camera_width / 2) - 10: round(camera_width / 2) + 10]
     avg_hsv_color = np.mean(np.mean(scan_area, axis=0), axis=0)
 
-    lower_threshold = np.array(avg_hsv_color*(1 - tolerance), dtype=int)
-    upper_threshold = np.array(avg_hsv_color*(1 + tolerance), dtype=int)
+    lower_threshold = np.array(avg_hsv_color * (1 - tolerance), dtype=int)
+    upper_threshold = np.array(avg_hsv_color * (1 + tolerance), dtype=int)
 
-    return lower_threshold, upper_threshold, tuple(cv2.cvtColor(np.uint8([[avg_hsv_color]]), cv2.COLOR_HSV2BGR)[0, 0])
+    avg_rgb_color = tuple(cv2.cvtColor(np.uint8([[avg_hsv_color]]), cv2.COLOR_HSV2BGR)[0, 0])
+
+    return lower_threshold, upper_threshold, avg_rgb_color
 
 
-def detect(img_c, lower_threshold, upper_threshold):
-    img_hsv = cv2.cvtColor(img_c, cv2.COLOR_BGR2HSV)
+def detect(img_rgb, lower_threshold, upper_threshold):
+    img_hsv = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2HSV)
 
     mask = cv2.inRange(img_hsv, lower_threshold, upper_threshold)
 
@@ -64,10 +66,12 @@ while True:
         play_array = np.vstack((d, play_array))
         for i, p in enumerate(play_array):
             if i <= 25 and p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(img, tuple(p), tuple(play_array[i + 1]), (0, 0, 0), 50 - i * 2 + 10)
+                cv2.line(img, tuple(p), tuple(play_array[i + 1]),
+                         (0, 0, 0), 50 - i * 2 + 10)
         for i, p in enumerate(play_array):
             if i <= 25 and p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(img, tuple(p), tuple(play_array[i + 1]), (int(color[0]), int(color[1]), int(color[2])), 50 - i * 2)
+                cv2.line(img, tuple(p), tuple(play_array[i + 1]),
+                         (int(color[0]), int(color[1]), int(color[2])), 50 - i * 2)
     else:
         cv2.circle(img, (round(camera_width / 2), round(camera_height / 2)), 25, (0, 0, 0), 10)
         cv2.circle(img, (round(camera_width / 2), round(camera_height / 2)), 25, (255, 255, 255), 6)
@@ -89,13 +93,19 @@ while True:
             img_draw[:, :] = [255, 255, 255]
         for i, p in enumerate(play_array):
             if p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(img_draw, tuple(p), tuple(play_array[i + 1]), (0, 0, 0), round(50 - i * (50 / len(play_array)) + 10))
+                cv2.line(img_draw, tuple(p), tuple(play_array[i + 1]),
+                         (0, 0, 0), round(50 - i * (50 / len(play_array)) + 10))
         for i, p in enumerate(play_array):
             if p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(img_draw, tuple(p), tuple(play_array[i + 1]), (int(color[0]), int(color[1]), int(color[2])), round(50 - i * (50 / len(play_array))))
+                cv2.line(img_draw, tuple(p), tuple(play_array[i + 1]),
+                         (int(color[0]), int(color[1]), int(color[2])), round(50 - i * (50 / len(play_array))))
 
         cv2.imshow("Draw", img_draw)
+    elif k == ord('c'):
+        img_draw = np.copy(frame)
+        img_draw[:, :] = [255, 255, 255]
 
+        cv2.imshow("Draw", img_draw)
 
 cap.release()
 cv2.destroyAllWindows()
