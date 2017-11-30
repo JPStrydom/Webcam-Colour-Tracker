@@ -21,18 +21,28 @@ sv_range = 100
 def calculate_color_threshold(img_brg):
     img_hsv = cv2.cvtColor(img_brg, cv2.COLOR_BGR2HSV)
 
-    scan_area = img_hsv[round(camera_height / 2) - 10: round(camera_height / 2) + 10,
-                        round(camera_width / 2) - 10: round(camera_width / 2) + 10]
+    scan_area = img_hsv[
+                    round(camera_height / 2) - 10: round(camera_height / 2) + 10,
+                    round(camera_width / 2) - 10: round(camera_width / 2) + 10
+                ]
     avg_hsv_color = np.mean(np.mean(scan_area, axis=0), axis=0)
 
-    lower_threshold = np.array([avg_hsv_color[0] - h_range,
-                                avg_hsv_color[1] - sv_range,
-                                avg_hsv_color[2] - sv_range],
-                               dtype=int)
-    upper_threshold = np.array([avg_hsv_color[0] + h_range,
-                                avg_hsv_color[1] + sv_range,
-                                avg_hsv_color[2] + sv_range],
-                               dtype=int)
+    lower_threshold = np.array(
+        [
+            avg_hsv_color[0] - h_range,
+            avg_hsv_color[1] - sv_range,
+            avg_hsv_color[2] - sv_range
+        ],
+        dtype=int
+    )
+    upper_threshold = np.array(
+        [
+            avg_hsv_color[0] + h_range,
+            avg_hsv_color[1] + sv_range,
+            avg_hsv_color[2] + sv_range
+        ],
+        dtype=int
+    )
 
     avg_brg_color = tuple(cv2.cvtColor(np.uint8([[avg_hsv_color]]), cv2.COLOR_HSV2BGR)[0, 0])
 
@@ -73,12 +83,22 @@ while True:
         play_array = np.vstack((d, play_array))
         for i, p in enumerate(play_array):
             if i <= 25 and p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(img, tuple(p), tuple(play_array[i + 1]),
-                         (0, 0, 0), 50 - i * 2 + 10)
+                cv2.line(
+                    img,
+                    tuple(p),
+                    tuple(play_array[i + 1]),
+                    (0, 0, 0),
+                    50 - i * 2 + 10
+                )
         for i, p in enumerate(play_array):
             if i <= 25 and p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(img, tuple(p), tuple(play_array[i + 1]),
-                         (int(color[0]), int(color[1]), int(color[2])), 50 - i * 2)
+                cv2.line(
+                    img,
+                    tuple(p),
+                    tuple(play_array[i + 1]),
+                    (int(color[0]), int(color[1]), int(color[2])),
+                    50 - i * 2
+                )
     else:
         cv2.circle(img, (round(camera_width / 2), round(camera_height / 2)), 25, (0, 0, 0), 10)
         cv2.circle(img, (round(camera_width / 2), round(camera_height / 2)), 25, (255, 255, 255), 6)
@@ -100,12 +120,22 @@ while True:
             img_draw[:, :] = [255, 255, 255]
         for i, p in enumerate(play_array):
             if p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(img_draw, tuple(p), tuple(play_array[i + 1]),
-                         (0, 0, 0), round(50 - i * (50 / len(play_array)) + 10))
+                cv2.line(
+                    img_draw,
+                    tuple(p),
+                    tuple(play_array[i + 1]),
+                    (0, 0, 0),
+                    round(50 - i * (50 / len(play_array)) + 10)
+                )
         for i, p in enumerate(play_array):
             if p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(img_draw, tuple(p), tuple(play_array[i + 1]),
-                         (int(color[0]), int(color[1]), int(color[2])), round(50 - i * (50 / len(play_array))))
+                cv2.line(
+                    img_draw,
+                    tuple(p),
+                    tuple(play_array[i + 1]),
+                    (int(color[0]), int(color[1]), int(color[2])),
+                    round(50 - i * (50 / len(play_array)))
+                )
 
         cv2.imshow("Draw", img_draw)
     elif k == ord('c'):
