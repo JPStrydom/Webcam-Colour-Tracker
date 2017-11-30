@@ -26,7 +26,7 @@ If you'd like to run this project yourself, you can follow the following steps:
 5) Run the command `pip install opencv_python` in the same directory as the source code to install the OpenCV package
 6) Run the `play.py` file to start the program
 
-The controls for the application are as follows:
+The keyboard controls for the application are as follows:
 - **`q`** - Quit and close the application (You can only use one instance of the application per web-camera, else it will crash)
 - **`d`** - Sample and track the average colour inside the target area (indicated by the white circle on the web-camera output) / Stop tracking the current colour
 - **`m`** - Draw the last tracked colour on a the canvas (if no canvas is open, it'll open one for you)
