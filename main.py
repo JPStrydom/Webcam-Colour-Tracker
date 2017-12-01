@@ -5,14 +5,10 @@ camera_width = 1280
 camera_height = 720
 
 cap = cv2.VideoCapture(0)
-
 cap.set(3, camera_width)
 cap.set(4, camera_height)
 
 detect_bool = False
-
-play_array = np.zeros([1, 2], dtype=tuple)
-img_draw = []
 
 h_range = 5
 sv_range = 100
@@ -74,35 +70,55 @@ def detect(img_brg, lower_threshold, upper_threshold):
     return tuple([cx, cy])
 
 
+def draw_color_line(img_brg, draw_point_array, draw_color, is_canvas=False):
+    draw_color_line_help(img_brg, draw_point_array, (0, 0, 0), is_canvas)
+    draw_color_line_help(img_brg, draw_point_array, draw_color, is_canvas)
+
+
+def draw_color_line_help(img_brg, draw_point_array, draw_color, is_canvas=False):
+    padding = 0
+    if draw_color == (0, 0, 0):
+        padding = 10
+
+    taper_rate = 2
+    if is_canvas:
+        taper_rate = (50 / len(draw_point_array))
+
+    for index, point in enumerate(draw_point_array):
+        if validate_point(index, point, draw_point_array, is_canvas):
+            cv2.line(
+                img_brg,
+                tuple(point),
+                tuple(draw_point_array[index + 1]),
+                (int(draw_color[0]), int(draw_color[1]), int(draw_color[2])),
+                round(50 - index * taper_rate + padding)
+            )
+
+
+def validate_point(index, point, draw_point_array, is_canvas):
+    return (index <= 25 or is_canvas) and\
+           point[0] != 0 and\
+           point[1] != 0 and\
+           draw_point_array[index + 1, 0] != 0 and\
+           draw_point_array[index + 1, 1] != 0
+
+
+def draw_target_circle(img_brg):
+    cv2.circle(img_brg, (round(camera_width / 2), round(camera_height / 2)), 25, (0, 0, 0), 10)
+    cv2.circle(img_brg, (round(camera_width / 2), round(camera_height / 2)), 25, (255, 255, 255), 6)
+    cv2.circle(img_brg, (round(camera_width / 2), round(camera_height / 2)), 25, (0, 0, 0), 2)
+
+
 while True:
     ret, frame = cap.read()
     img = np.copy(frame)
 
     if detect_bool:
-        d = detect(img, lower, upper)
-        play_array = np.vstack((d, play_array))
-        for i, p in enumerate(play_array):
-            if i <= 25 and p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(
-                    img,
-                    tuple(p),
-                    tuple(play_array[i + 1]),
-                    (0, 0, 0),
-                    50 - i * 2 + 10
-                )
-        for i, p in enumerate(play_array):
-            if i <= 25 and p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(
-                    img,
-                    tuple(p),
-                    tuple(play_array[i + 1]),
-                    (int(color[0]), int(color[1]), int(color[2])),
-                    50 - i * 2
-                )
+        detected_point = detect(img, lower, upper)
+        point_array = np.vstack((detected_point, point_array))
+        draw_color_line(img, point_array, color)
     else:
-        cv2.circle(img, (round(camera_width / 2), round(camera_height / 2)), 25, (0, 0, 0), 10)
-        cv2.circle(img, (round(camera_width / 2), round(camera_height / 2)), 25, (255, 255, 255), 6)
-        cv2.circle(img, (round(camera_width / 2), round(camera_height / 2)), 25, (0, 0, 0), 2)
+        draw_target_circle(img)
 
     cv2.imshow("Image", img)
 
@@ -112,30 +128,14 @@ while True:
     elif k == ord("d"):
         detect_bool = not detect_bool
         if detect_bool:
-            play_array = np.zeros([1, 2], dtype=tuple)
+            point_array = np.zeros([1, 2], dtype=tuple)
             lower, upper, color = calculate_color_threshold(img)
     elif k == ord('m'):
-        if len(img_draw) < 1:
+        if 'img_draw' not in globals():
             img_draw = np.copy(frame)
             img_draw[:, :] = [255, 255, 255]
-        for i, p in enumerate(play_array):
-            if p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(
-                    img_draw,
-                    tuple(p),
-                    tuple(play_array[i + 1]),
-                    (0, 0, 0),
-                    round(50 - i * (50 / len(play_array)) + 10)
-                )
-        for i, p in enumerate(play_array):
-            if p[0] != 0 and p[1] != 0 and play_array[i + 1, 0] != 0 and play_array[i + 1, 1] != 0:
-                cv2.line(
-                    img_draw,
-                    tuple(p),
-                    tuple(play_array[i + 1]),
-                    (int(color[0]), int(color[1]), int(color[2])),
-                    round(50 - i * (50 / len(play_array)))
-                )
+        if 'point_array' in globals():
+            draw_color_line(img_draw, point_array, color, is_canvas=True)
 
         cv2.imshow("Draw", img_draw)
     elif k == ord('c'):
