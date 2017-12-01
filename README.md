@@ -24,7 +24,7 @@ If you'd like to run this project yourself, you can follow the following steps:
         - ``
 4) Run the command `pip install numpy` in the same directory as the source code to install the numpy package
 5) Run the command `pip install opencv_python` in the same directory as the source code to install the OpenCV package
-6) Run the `play.py` file to start the program
+6) Run the `main.py` file in the src directory to start the program
 
 The keyboard controls for the application are as follows:
 - **`q`** - Quit and close the application (You can only use one instance of the application per web-camera, else it will crash)
