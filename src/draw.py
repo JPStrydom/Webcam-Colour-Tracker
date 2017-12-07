@@ -1,6 +1,6 @@
 import cv2
 
-import config
+from . import config
 
 camera_width = config.camera_width
 camera_height = config.camera_height
