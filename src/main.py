@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 
-from . import computation
-from . import config
-from . import draw
+from src import computation
+from src import config
+from src import draw
 
 camera_width = config.camera_width
 camera_height = config.camera_height
